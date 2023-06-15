@@ -3,7 +3,7 @@
 
 * Inspired by https://github.com/ThePrimeagen/.dotfiles/blob/602019e902634188ab06ea31251c01c1a43d1621/bin/.local/scripts/tmux-sessionizer - just for zellij
 
-* Allows you to use `fzf` to navigate into a desire folder and either start or attach into a zellij session
+* Allows you to use `fzf` to navigate into a desired folder and either start or attach into a zellij session
 
 * If you run it from inside zellij, it will open the newly selected folder in a new pane
 
