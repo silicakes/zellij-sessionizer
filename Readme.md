@@ -7,6 +7,8 @@
 
 * If you run it from inside zellij, it will open the newly selected folder in a new pane
 
+* Will use [fd](https://github.com/sharkdp/fd) if installed, otherwise - will defer to using `find`
+
 ### Demo of the original: 
  https://youtu.be/bdumjiHabhQ?t=269
 
@@ -16,5 +18,4 @@
  1. Place the script in your path
  2. Create an alias to call this script in your shells .rc config: 
     bindkey -s ^f "zellij-sessionizer\n"
- 3. Update where you want to search:
-    I'm using `fd` to perform the search inside a specific dir, you can use that or `find`
+ 3. Update which paths you'd like to search in
