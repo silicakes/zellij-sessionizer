@@ -1,40 +1,31 @@
-#!/usr/bin/env bash
+#!/usr/bin/env nu
 
-# Use an argument if passed
-if [[ $# -eq 1 ]]; then
-    selected_path=$1
-else
-	# If no argument was provided, interactively choose a directory
+def is-inside-zellij [] {
+    $env.ZELLIJ? != null
+}
 
-	# Check whether the machine has fd available
-	if [ -x "$(command -v fd)" ]; then
-    selected_path=$(fd . ~/dev --min-depth 1 --max-depth 2 --type d | fzf)
-	else
-		# defer to find if not
-		selected_path=$(find ~/dev -mindepth 1 -maxdepth 2 -type d | fzf)
-	fi
-fi
+def main [
+    path: path
+] {
+    let project = (if (which fd | is-empty) {
+        ^find $path -mindepth 1 -maxdepth 2 -type d
+    } else {
+        ^fd . $path --min-depth 1 --max-depth 2 --type d
+    } | fzf)
 
-# If no directory was selected, exit the script
-if [[ -z $selected_path ]]; then
-    exit 0
-fi
+    let session = ($project | path basename)
 
-# Get the name of the selected directory, replacing "." with "_"
-session_name=$(basename "$selected_path" | tr . _)
+    if not (is-inside-zellij) {
+        cd $project
+        zellij attach --create $session options --default-shell nu
+        return
+    }
 
-# We're outside of zellij, so lets create a new session or attach to a new one.
-if [[ -z $ZELLIJ ]]; then
-	cd $selected_path
-  
-  # -c will make zellij to either create a new session or to attach into an existing one
-	zellij attach $session_name -c
-	exit 0
-fi
+    zellij action new-pane
 
-# We're inside zellij so we'll open a new pane and move into the selected directory
-zellij action new-pane
-
-# Hopefully they'll someday support specifying a directory and this won't be as laggy
-# thanks to @msirringhaus for getting this from the community some time ago!
-zellij action write-chars "cd $selected_path" && zellij action write 10
+    # Hopefully they'll someday support specifying a directory and this won't be
+    # as laggy thanks to @msirringhaus for getting this from the community some
+    # time ago!
+    zellij action write-chars $"cd ($project)"
+    zellij action write 10
+}
