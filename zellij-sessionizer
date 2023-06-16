@@ -8,19 +8,22 @@ if [[ -z $paths ]]; then
 	exit 0
 fi
 
-# Use an argument if passed
-    selected_path=$1
-		# Check whether the machine has fd available
-	if [ -x "$(command -v fd)" ]; then
-    selected_path=$(fd . $paths --min-depth 1 --max-depth 2 --type d | fzf)
-	else
-		# defer to find if not
-		selected_path=$(find $paths -mindepth 1 -maxdepth 2 -type d | fzf)
-	fi
+# Check whether the machine has fd available
+if [ -x "$(command -v fd)" ]; then
+	selected_path=$(fd . $paths --min-depth 1 --max-depth 2 --type d | fzf)
+else
+	# defer to find if not
+	selected_path=$(find $paths -mindepth 1 -maxdepth 2 -type d | fzf)
+fi
+
+# If nothing was picked, silently exit
+if [[ -z $selected_path ]]; then
+	exit 0
+fi
 
 # If no directory was selected, exit the script
 if [[ -z $selected_path ]]; then
-    exit 0
+	exit 0
 fi
 
 # Get the name of the selected directory, replacing "." with "_"
