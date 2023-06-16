@@ -17,5 +17,5 @@
 
  1. Place the script in your path
  2. Create an alias to call this script in your shells .rc config: 
-    bindkey -s ^f "zellij-sessionizer\n"
+    bindkey -s ^f "zellij-sessionizer path1 path2 etc..\n"
  3. Update which paths you'd like to search in
