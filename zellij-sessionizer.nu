@@ -4,8 +4,12 @@ def is-inside-zellij [] {
     $env.ZELLIJ? != null
 }
 
+# attach to a Zellij session by fuzzy finding projects
+#
+# the projects are computed by listing all the directories at depth between 1
+# and 2 recursively under the `path` argument.
 def main [
-    path: path
+    path: path  # the directory to search projects inside
 ] {
     let project = (if (which fd | is-empty) {
         ^find $path -mindepth 1 -maxdepth 2 -type d
