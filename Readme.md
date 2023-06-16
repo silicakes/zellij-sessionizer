@@ -12,10 +12,12 @@
 [My Developer Workflow - How I use i3, tmux, and vim](https://youtu.be/bdumjiHabhQ?t=269) from @ThePrimeagen
 
 ## Installation / Usage
-
- 1. Place the script in your path
- 2. Create an alias to call this script in your shells .rc config: 
+### POSIX shells
+ 1. Place the [`zellij-sessionizer`](zellij-sessionizer) script in your `PATH`
+ 2. Create an alias to call this script in your shells `.rc` config, e.g. in `zsh`
+    ```sh
     bindkey -s ^f "zellij-sessionizer\n"
+    ```
  3. Update which paths you'd like to search in
 
 
