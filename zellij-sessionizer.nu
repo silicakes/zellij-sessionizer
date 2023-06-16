@@ -17,6 +17,10 @@ def main [
         ^fd . $path --min-depth 1 --max-depth 2 --type d
     } | fzf)
 
+    if ($project | is-empty) {
+        return
+    }
+
     let session = ($project | path basename)
 
     if not (is-inside-zellij) {
