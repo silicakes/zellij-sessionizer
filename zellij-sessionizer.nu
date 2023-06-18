@@ -11,20 +11,20 @@ def is-inside-zellij [] {
 def main [
     path: path  # the directory to search projects inside
 ] {
-    let project = (if (which fd | is-empty) {
+    let directory = (if (which fd | is-empty) {
         ^find $path -mindepth 1 -maxdepth 2 -type d
     } else {
         ^fd . $path --min-depth 1 --max-depth 2 --type d
     } | fzf)
 
-    if ($project | is-empty) {
+    if ($directory | is-empty) {
         return
     }
 
-    let session = ($project | path basename)
+    let session = ($directory | path basename)
 
     if not (is-inside-zellij) {
-        cd $project
+        cd $directory
         zellij attach --create $session options --default-shell nu
         return
     }
@@ -34,6 +34,6 @@ def main [
     # Hopefully they'll someday support specifying a directory and this won't be
     # as laggy thanks to @msirringhaus for getting this from the community some
     # time ago!
-    zellij action write-chars $"cd ($project)"
+    zellij action write-chars $"cd ($directory)"
     zellij action write 10
 }
