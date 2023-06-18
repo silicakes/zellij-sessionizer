@@ -6,10 +6,16 @@ def is-inside-zellij [] {
 
 # attach to a Zellij session by fuzzy finding projects
 #
-# the projects are computed by listing all the directories at depth between 1
-# and 2 recursively under the `path` argument.
+# # Examples
+#     opening a session by listing `nu-git-manager` repositories
+#     > zellij-sessionizer.nu (gm list --full-path)
+#
+#     open a session in local repos and documents
+#     > zellij-sessionizer.nu (
+#     >     [~/.local/share/repos/ ~/documents/] | each { ls $in | where type == dir | get name } | flatten
+#     > )
 def main [
-    ...paths: path
+    ...paths: path  # the list of paths to fuzzy find
 ] {
     if ($paths | is-empty) {
         error make --unspanned {msg: "no path given"}
