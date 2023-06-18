@@ -14,15 +14,25 @@ def is-inside-zellij [] {
 #     > zellij-sessionizer.nu (
 #     >     [~/.local/share/repos/ ~/documents/] | each { ls $in | where type == dir | get name } | flatten
 #     > )
+#
+#     open a session in local repos and documents (same as above)
+#     > zellij-sessionizer.nu ~/.local/share/repos/ ~/documents/ --depth 1
 def main [
     ...paths: path  # the list of paths to fuzzy find
+    --depth (-d): int = 0  # when greater or equal to 1, searches all the paths at the given depth
 ] {
     if ($paths | is-empty) {
         error make --unspanned {msg: "no path given"}
     }
 
     let choices = (
-        $paths | each {
+        $paths | if $depth > 0 { each {|path|
+            if (which fd | is-empty) {
+                ^find $path -mindepth ($depth - 1) -maxdepth $depth -type d | lines
+            } else {
+                ^fd . $path --min-depth ($depth - 1) --max-depth $depth --type d | lines
+            }
+        } | flatten } else {} | each {
             let tokens = ($in | path split)
 
             {
