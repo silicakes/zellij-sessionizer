@@ -37,14 +37,16 @@ in my `config.nu` file, i've added the following binding under `$env.config.keyb
      mode: [emacs, vi_insert, vi_normal]
      event: {
          send: executehostcommand
-         cmd: "zellij-sessionizer.nu $env.GIT_REPOS_HOME"
+         cmd: "zellij-sessionizer.nu [--depth/-d] ...paths"
      }
  }
 ```
-given that
-- `zellij-sessionizer.nu` is in your `$env.PATH`,
-- `$env.GIT_REPOS_HOME` is some variable defined in `env.nu` that points to a
-place with lots of projects,
+given that `zellij-sessionizer.nu` is in your `$env.PATH`.
+
+here the `...` represents any set of arguments and options, e.g.
+- a command that lists all the paths directly: `gm list --full-path`
+- a more complex one: `[~/.local/share/repos/ ~/documents/] | each { ls $in | where type == dir | get name } | flatten`
+- or let `zellij-sessionizer.nu` handle the search at some depth: `~/.local/share/repos/ ~/documents/ --depth 1`
 
 this binding will run the sessionizer simply by pressing `<C-f>` :ok_hand:
 

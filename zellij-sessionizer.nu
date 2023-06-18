@@ -6,25 +6,57 @@ def is-inside-zellij [] {
 
 # attach to a Zellij session by fuzzy finding projects
 #
-# the projects are computed by listing all the directories at depth between 1
-# and 2 recursively under the `path` argument.
+# # Examples
+#     opening a session by listing `nu-git-manager` repositories
+#     > zellij-sessionizer.nu (gm list --full-path)
+#
+#     open a session in local repos and documents
+#     > zellij-sessionizer.nu (
+#     >     [~/.local/share/repos/ ~/documents/] | each { ls $in | where type == dir | get name } | flatten
+#     > )
+#
+#     open a session in local repos and documents (same as above)
+#     > zellij-sessionizer.nu ~/.local/share/repos/ ~/documents/ --depth 1
 def main [
-    path: path  # the directory to search projects inside
+    ...paths: path  # the list of paths to fuzzy find
+    --depth (-d): int = 0  # when greater or equal to 1, searches all the paths at the given depth
 ] {
-    let project = (if (which fd | is-empty) {
-        ^find $path -mindepth 1 -maxdepth 2 -type d
-    } else {
-        ^fd . $path --min-depth 1 --max-depth 2 --type d
-    } | fzf)
+    if ($paths | is-empty) {
+        error make --unspanned {msg: "no path given"}
+    }
 
-    if ($project | is-empty) {
+    let choices = (
+        $paths | if $depth > 0 { each {|path|
+            if (which fd | is-empty) {
+                ^find $path -mindepth ($depth - 1) -maxdepth $depth -type d | lines
+            } else {
+                ^fd . $path --min-depth ($depth - 1) --max-depth $depth --type d | lines
+            }
+        } | flatten } else {} | each {
+            let tokens = ($in | path split)
+
+            {
+                project: ($tokens | last)
+                path: ($tokens | drop 1 | path join)
+            }
+        }
+    )
+
+    let choice = (
+        $choices.project | input list --fuzzy
+            $"Please (ansi red)choose a directory(ansi reset) to (ansi cyan)attach to(ansi reset): "
+    )
+    if ($choice | is-empty) {
         return
     }
 
-    let session = ($project | path basename)
+    let choice = ($choices | where project == $choice | get 0)
+    let directory = ($choice.path | path join $choice.project)
+
+    let session = ($directory | path basename)
 
     if not (is-inside-zellij) {
-        cd $project
+        cd $directory
         zellij attach --create $session options --default-shell nu
         return
     }
@@ -34,6 +66,6 @@ def main [
     # Hopefully they'll someday support specifying a directory and this won't be
     # as laggy thanks to @msirringhaus for getting this from the community some
     # time ago!
-    zellij action write-chars $"cd ($project)"
+    zellij action write-chars $"cd ($directory)"
     zellij action write 10
 }
