@@ -9,17 +9,33 @@ def is-inside-zellij [] {
 # the projects are computed by listing all the directories at depth between 1
 # and 2 recursively under the `path` argument.
 def main [
-    path: path  # the directory to search projects inside
+    ...paths: path
 ] {
-    let directory = (if (which fd | is-empty) {
-        ^find $path -mindepth 1 -maxdepth 2 -type d
-    } else {
-        ^fd . $path --min-depth 1 --max-depth 2 --type d
-    } | fzf)
+    if ($paths | is-empty) {
+        error make --unspanned {msg: "no path given"}
+    }
 
-    if ($directory | is-empty) {
+    let choices = (
+        $paths | each {
+            let tokens = ($in | path split)
+
+            {
+                project: ($tokens | last)
+                path: ($tokens | drop 1 | path join)
+            }
+        }
+    )
+
+    let choice = (
+        $choices.project | input list --fuzzy
+            $"Please (ansi red)choose a directory(ansi reset) to (ansi cyan)attach to(ansi reset): "
+    )
+    if ($choice | is-empty) {
         return
     }
+
+    let choice = ($choices | where project == $choice | get 0)
+    let directory = ($choice.path | path join $choice.project)
 
     let session = ($directory | path basename)
 
